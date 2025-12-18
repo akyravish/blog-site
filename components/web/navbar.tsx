@@ -24,10 +24,10 @@ export const Navigation = () => {
 				</Link>
 			</div>
 			<div className="flex items-center gap-4">
-				<Link href="/auth/login" className={buttonVariants({ variant: 'outline' })}>
+				<Link href="/login" className={buttonVariants({ variant: 'outline' })}>
 					Login
 				</Link>
-				<Link href="/auth/signup" className={buttonVariants({ variant: 'default' })}>
+				<Link href="/sign-up" className={buttonVariants({ variant: 'default' })}>
 					Sign up
 				</Link>
 				<ThemeChanger />
