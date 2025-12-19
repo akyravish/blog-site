@@ -9,7 +9,7 @@ import {
 } from '@/components/ui/card';
 import { useForm } from '@tanstack/react-form';
 import { signupSchema } from '@/app/schemas/auth';
-import { Field, FieldGroup, FieldLabel, FieldDescription, FieldError } from '@/components/ui/field';
+import { Field, FieldGroup, FieldLabel, FieldError } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
