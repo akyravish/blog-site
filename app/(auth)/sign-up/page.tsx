@@ -12,8 +12,11 @@ import { signupSchema } from '@/app/schemas/auth';
 import { Field, FieldGroup, FieldLabel, FieldError } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { useState } from 'react';
+import { Spinner } from '@/components/ui/spinner';
 
 export default function SignupPage() {
+	const [isSubmitted, setIsSubmitted] = useState(false);
 	const form = useForm({
 		defaultValues: {
 			name: '',
@@ -22,11 +25,21 @@ export default function SignupPage() {
 			confirmPassword: '',
 		},
 		validators: {
+			onBlur: signupSchema,
 			onSubmit: signupSchema,
-			onChangeAsync: signupSchema,
 		},
 		onSubmit: async ({ value }) => {
 			console.log('Form submitted:', value);
+			setIsSubmitted(true);
+			try {
+				// set timeout to 2 seconds
+				setTimeout(() => {
+					setIsSubmitted(false);
+				}, 2000);
+			} catch (error) {
+				console.error('Error:', error);
+				setIsSubmitted(false);
+			}
 		},
 	});
 	return (
@@ -42,10 +55,13 @@ export default function SignupPage() {
 						e.preventDefault();
 						form.handleSubmit();
 					}}>
-					<FieldGroup>
+					<FieldGroup className="gap-y-4">
 						<form.Field name="name">
 							{(field) => {
-								const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+								const isInvalid =
+									field.state.meta.isTouched &&
+									!field.state.meta.isValid &&
+									field.state.meta.errors.length > 0;
 
 								return (
 									<Field data-invalid={isInvalid}>
@@ -146,8 +162,15 @@ export default function SignupPage() {
 			</CardContent>
 			<CardFooter>
 				<Field orientation="horizontal">
-					<Button type="submit" form="signup-form">
-						Sign Up
+					<Button type="submit" form="signup-form" disabled={isSubmitted} className="w-full">
+						{isSubmitted ? (
+							<div className="flex items-center gap-2">
+								<Spinner />
+								<span>Signing up...</span>
+							</div>
+						) : (
+							'Sign Up'
+						)}
 					</Button>
 				</Field>
 			</CardFooter>
