@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import { Geist, Geist_Mono, JetBrains_Mono } from 'next/font/google';
 import './globals.css';
 import { ThemeProvider } from '@/components/ui/theme-provider';
+import { ConvexClientProvider } from '@/components/web/ConvexClientProvider';
+import { Toaster } from '@/components/ui/sonner';
 
 const jetbrainsMono = JetBrains_Mono({ subsets: ['latin'], variable: '--font-sans' });
 
@@ -33,7 +35,10 @@ export default function RootLayout({
 					defaultTheme="system"
 					enableSystem
 					disableTransitionOnChange>
-					<main className="max-w-7xl mx-auto w-full px-4 md:px-6 lg:px-8 bg-d">{children}</main>
+					<ConvexClientProvider>
+						<main className="max-w-7xl mx-auto w-full px-4 md:px-6 lg:px-8 bg-d">{children}</main>
+						<Toaster closeButton />
+					</ConvexClientProvider>
 				</ThemeProvider>
 			</body>
 		</html>

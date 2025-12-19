@@ -11,12 +11,18 @@ import { useForm } from '@tanstack/react-form';
 import { signupSchema } from '@/app/schemas/auth';
 import { Field, FieldGroup, FieldLabel, FieldError } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
+import { Button, buttonVariants } from '@/components/ui/button';
 import { useState } from 'react';
 import { Spinner } from '@/components/ui/spinner';
+import { z } from 'zod';
+import { authClient } from '@/lib/auth-client';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
+import Link from 'next/link';
 
 export default function SignupPage() {
 	const [isSubmitted, setIsSubmitted] = useState(false);
+	const router = useRouter();
 	const form = useForm({
 		defaultValues: {
 			name: '',
@@ -25,19 +31,30 @@ export default function SignupPage() {
 			confirmPassword: '',
 		},
 		validators: {
-			onBlur: signupSchema,
 			onSubmit: signupSchema,
 		},
-		onSubmit: async ({ value }) => {
-			console.log('Form submitted:', value);
+		onSubmit: async ({ value }: { value: z.infer<typeof signupSchema> }) => {
 			setIsSubmitted(true);
 			try {
-				// set timeout to 2 seconds
-				setTimeout(() => {
-					setIsSubmitted(false);
-				}, 2000);
+				await authClient.signUp.email({
+					name: value.name,
+					email: value.email,
+					password: value.password,
+					fetchOptions: {
+						onSuccess: () => {
+							toast.success('Signed up successfully');
+							router.push('/');
+						},
+						onError: ({ error }) => {
+							toast.error('Failed to sign up', {
+								description: error?.message ?? 'Unknown error',
+							});
+						},
+					},
+				});
 			} catch (error) {
 				console.error('Error:', error);
+			} finally {
 				setIsSubmitted(false);
 			}
 		},
@@ -161,7 +178,7 @@ export default function SignupPage() {
 				</form>
 			</CardContent>
 			<CardFooter>
-				<Field orientation="horizontal">
+				<Field orientation="horizontal" className="mt-4">
 					<Button type="submit" form="signup-form" disabled={isSubmitted} className="w-full">
 						{isSubmitted ? (
 							<div className="flex items-center gap-2">
@@ -174,6 +191,12 @@ export default function SignupPage() {
 					</Button>
 				</Field>
 			</CardFooter>
+			<span className="text-sm text-center">
+				Already have an account?
+				<Link href="/login" className={buttonVariants({ variant: 'link' })}>
+					Login
+				</Link>
+			</span>
 		</Card>
 	);
 }

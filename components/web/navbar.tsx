@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { buttonVariants } from '../ui/button';
 import { ThemeChanger } from './theme-toggle';
+import { NavbarAuth } from './navbar-auth';
 
 export const Navigation = () => {
 	return (
@@ -24,12 +25,7 @@ export const Navigation = () => {
 				</Link>
 			</div>
 			<div className="flex items-center gap-4">
-				<Link href="/login" className={buttonVariants({ variant: 'outline' })}>
-					Login
-				</Link>
-				<Link href="/sign-up" className={buttonVariants({ variant: 'default' })}>
-					Sign up
-				</Link>
+				<NavbarAuth />
 				<ThemeChanger />
 			</div>
 		</nav>
