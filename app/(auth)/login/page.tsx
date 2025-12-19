@@ -4,7 +4,7 @@ import { loginSchema } from '@/app/schemas/auth';
 import { Field, FieldGroup, FieldLabel, FieldError } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { Button, buttonVariants } from '@/components/ui/button';
-import { useState } from 'react';
+import { useTransition } from 'react';
 import { Spinner } from '@/components/ui/spinner';
 import {
 	Card,
@@ -21,7 +21,7 @@ import { toast } from 'sonner';
 import Link from 'next/link';
 
 export default function LoginPage() {
-	const [isSubmitted, setIsSubmitted] = useState(false);
+	const [isPending, startTransition] = useTransition();
 	const router = useRouter();
 	const form = useForm({
 		defaultValues: {
@@ -32,28 +32,30 @@ export default function LoginPage() {
 			onSubmit: loginSchema,
 		},
 		onSubmit: async ({ value }: { value: z.infer<typeof loginSchema> }) => {
-			setIsSubmitted(true);
-			try {
-				await authClient.signIn.email({
-					email: value.email,
-					password: value.password,
-					fetchOptions: {
-						onSuccess: () => {
-							toast.success('Logged in successfully');
-							router.push('/');
+			startTransition(async () => {
+				try {
+					await authClient.signIn.email({
+						email: value.email,
+						password: value.password,
+						fetchOptions: {
+							onSuccess: () => {
+								toast.success('Logged in successfully');
+								router.push('/');
+							},
+							onError: ({ error }: { error: { message: string } }) => {
+								toast.error('Failed to login', {
+									description: error?.message ?? 'Unknown error',
+								});
+							},
 						},
-						onError: ({ error }) => {
-							toast.error('Failed to login', {
-								description: error?.message ?? 'Unknown error',
-							});
-						},
-					},
-				});
-			} catch (error) {
-				console.error('Error:', error);
-			} finally {
-				setIsSubmitted(false);
-			}
+					});
+				} catch (error: unknown) {
+					console.error('Error:', error);
+					toast.error('Failed to login', {
+						description: error instanceof Error ? error.message : 'Unknown error',
+					});
+				}
+			});
 		},
 	});
 	return (
@@ -127,8 +129,8 @@ export default function LoginPage() {
 			</CardContent>
 			<CardFooter>
 				<Field orientation="horizontal" className="mt-4">
-					<Button type="submit" form="login-form" disabled={isSubmitted} className="w-full">
-						{isSubmitted ? (
+					<Button type="submit" form="login-form" disabled={isPending} className="w-full">
+						{isPending ? (
 							<div className="flex items-center gap-2">
 								<Spinner />
 								<span>Logging in...</span>

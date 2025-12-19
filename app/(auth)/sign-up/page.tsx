@@ -12,7 +12,7 @@ import { signupSchema } from '@/app/schemas/auth';
 import { Field, FieldGroup, FieldLabel, FieldError } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { Button, buttonVariants } from '@/components/ui/button';
-import { useState } from 'react';
+import { useTransition } from 'react';
 import { Spinner } from '@/components/ui/spinner';
 import { z } from 'zod';
 import { authClient } from '@/lib/auth-client';
@@ -21,7 +21,7 @@ import { toast } from 'sonner';
 import Link from 'next/link';
 
 export default function SignupPage() {
-	const [isSubmitted, setIsSubmitted] = useState(false);
+	const [isPending, startTransition] = useTransition();
 	const router = useRouter();
 	const form = useForm({
 		defaultValues: {
@@ -34,29 +34,30 @@ export default function SignupPage() {
 			onSubmit: signupSchema,
 		},
 		onSubmit: async ({ value }: { value: z.infer<typeof signupSchema> }) => {
-			setIsSubmitted(true);
-			try {
-				await authClient.signUp.email({
-					name: value.name,
-					email: value.email,
-					password: value.password,
-					fetchOptions: {
-						onSuccess: () => {
-							toast.success('Signed up successfully');
-							router.push('/');
+			startTransition(async () => {
+				try {
+					await authClient.signUp.email({
+						name: value.name,
+						email: value.email,
+						password: value.password,
+						fetchOptions: {
+							onSuccess: () => {
+								toast.success('Signed up successfully');
+								router.push('/');
+							},
+							onError: ({ error }: { error: { message: string } }) => {
+								toast.error('Failed to sign up', {
+									description: error?.message ?? 'Unknown error',
+								});
+							},
 						},
-						onError: ({ error }) => {
-							toast.error('Failed to sign up', {
-								description: error?.message ?? 'Unknown error',
-							});
-						},
-					},
-				});
-			} catch (error) {
-				console.error('Error:', error);
-			} finally {
-				setIsSubmitted(false);
-			}
+					});
+				} catch (error: unknown) {
+					toast.error('Failed to sign up', {
+						description: error instanceof Error ? error.message : 'Unknown error',
+					});
+				}
+			});
 		},
 	});
 	return (
@@ -179,8 +180,8 @@ export default function SignupPage() {
 			</CardContent>
 			<CardFooter>
 				<Field orientation="horizontal" className="mt-4">
-					<Button type="submit" form="signup-form" disabled={isSubmitted} className="w-full">
-						{isSubmitted ? (
+					<Button type="submit" form="signup-form" disabled={isPending} className="w-full">
+						{isPending ? (
 							<div className="flex items-center gap-2">
 								<Spinner />
 								<span>Signing up...</span>
