@@ -63,7 +63,7 @@ export default function SignupPage() {
 	return (
 		<Card>
 			<CardHeader>
-				<CardTitle>Sign Up</CardTitle>
+				<CardTitle className="text-2xl text-orange-500">Sign Up</CardTitle>
 				<CardDescription>Create a new account!</CardDescription>
 			</CardHeader>
 			<CardContent>
@@ -180,7 +180,11 @@ export default function SignupPage() {
 			</CardContent>
 			<CardFooter>
 				<Field orientation="horizontal" className="mt-4">
-					<Button type="submit" form="signup-form" disabled={isPending} className="w-full">
+					<Button
+						type="submit"
+						form="signup-form"
+						disabled={isPending}
+						className="w-full bg-orange-500 hover:bg-orange-600 text-white focus-visible:ring-orange-300">
 						{isPending ? (
 							<div className="flex items-center gap-2">
 								<Spinner />
@@ -192,7 +196,7 @@ export default function SignupPage() {
 					</Button>
 				</Field>
 			</CardFooter>
-			<span className="text-sm text-center">
+			<span className="text-sm text-center text-muted-foreground mb-4 mx-auto">
 				Already have an account?
 				<Link href="/login" className={buttonVariants({ variant: 'link' })}>
 					Login

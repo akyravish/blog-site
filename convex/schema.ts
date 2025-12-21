@@ -6,7 +6,5 @@ export default defineSchema({
 		title: v.string(),
 		content: v.string(),
 		author: v.string(),
-		createdAt: v.number(),
-		updatedAt: v.number(),
 	}).index('by_author', ['author']),
 });

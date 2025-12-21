@@ -38,14 +38,16 @@ export default function CreatePage() {
 	return (
 		<div className="py-12">
 			<div className="text-center mb-12">
-				<h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl">Create Post</h1>
+				<h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl text-orange-500">
+					Create Post
+				</h1>
 				<p className="mt-2 text-lg text-muted-foreground">
 					Create a new post to share with the world.
 				</p>
 			</div>
 			<Card className="w-full max-w-xl mx-auto">
 				<CardHeader>
-					<CardTitle>Create Blog Article</CardTitle>
+					<CardTitle className="text-2xl text-orange-500">Create Blog Article</CardTitle>
 					<CardDescription>Fill in the form below to create a new blog article.</CardDescription>
 				</CardHeader>
 				<CardContent>
@@ -115,7 +117,11 @@ export default function CreatePage() {
 				</CardContent>
 				<CardFooter>
 					<Field orientation="horizontal" className="mt-4">
-						<Button type="submit" form="create-blog-form" disabled={isPending} className="w-full">
+						<Button
+							type="submit"
+							form="create-blog-form"
+							disabled={isPending}
+							className="w-full bg-orange-500 hover:bg-orange-600 text-white focus-visible:ring-orange-300">
 							{isPending ? (
 								<div className="flex items-center gap-2">
 									<Spinner />

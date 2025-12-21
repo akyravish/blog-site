@@ -42,7 +42,7 @@ export const NavbarAuth = () => {
 			) : (
 				<>
 					{isAuthenticated ? (
-						<Button onClick={handleLogout} disabled={loading}>
+						<Button onClick={handleLogout} disabled={loading} variant="colorful">
 							{loading ? <Spinner /> : 'Logout'}
 						</Button>
 					) : (
@@ -50,7 +50,7 @@ export const NavbarAuth = () => {
 							<Link href="/login" className={buttonVariants({ variant: 'outline' })}>
 								Login
 							</Link>
-							<Link href="/sign-up" className={buttonVariants({ variant: 'default' })}>
+							<Link href="/sign-up" className={buttonVariants({ variant: 'colorful' })}>
 								Sign up
 							</Link>
 						</>

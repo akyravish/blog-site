@@ -6,7 +6,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
 	return (
 		<div className="min-h-screen flex items-center justify-center">
 			<div className="absolute top-4 left-4">
-				<Link href="/" className={buttonVariants({ variant: 'secondary' })}>
+				<Link href="/" className={buttonVariants({ variant: 'colorful' })}>
 					<ArrowLeft className="size-4" />
 					<span>Back</span>
 				</Link>

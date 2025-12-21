@@ -9,7 +9,7 @@ export const Navigation = () => {
 			<div className="flex items-center gap-8">
 				<Link href="/">
 					<h1 className="text-3xl font-bold">
-						Next<span className="text-blue-500">Pro</span>
+						Next<span className="text-orange-500">Pro</span>
 					</h1>
 				</Link>
 			</div>
