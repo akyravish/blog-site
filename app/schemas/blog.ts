@@ -6,4 +6,7 @@ export const createBlogSchema = z.object({
 		.string()
 		.min(1, 'Content is required')
 		.max(1000, 'Content must be less than 1000 characters'),
+	image: z.instanceof(File).refine((file) => file.size <= 1 * 1024 * 1024, {
+		message: 'Image size must be less than or equal to 1MB',
+	}),
 });

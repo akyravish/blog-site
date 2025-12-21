@@ -37,10 +37,15 @@ async function LoadBlogList() {
 				<Card key={post._id} className="p-2">
 					<div className="relative h-48 w-full overflow-hidden rounded-md">
 						<Image
-							src="https://images.unsplash.com/photo-1526779259212-939e64788e3c?q=80&w=3548&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+							src={
+								post.imageUrl ??
+								'https://images.unsplash.com/photo-1526779259212-939e64788e3c?q=80&w=3548&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'
+							}
 							alt={`${post.title} Image`}
-							loading="lazy"
+							priority
 							fill
+							sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+							className="object-cover hover:scale-105 transition-transform duration-300"
 						/>
 					</div>
 					<CardContent className="p-2">

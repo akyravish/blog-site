@@ -25,6 +25,7 @@ export default function CreatePage() {
 		defaultValues: {
 			title: '',
 			content: '',
+			image: undefined as unknown as File,
 		},
 		validators: {
 			onSubmit: createBlogSchema,
@@ -106,6 +107,32 @@ export default function CreatePage() {
 												aria-invalid={isInvalid}
 												placeholder="Enter your blog content"
 												rows={10}
+											/>
+											{isInvalid && <FieldError errors={field.state.meta.errors} />}
+										</Field>
+									);
+								}}
+							</form.Field>
+							<form.Field name="image">
+								{(field) => {
+									const isInvalid =
+										field.state.meta.isTouched &&
+										!field.state.meta.isValid &&
+										field.state.meta.errors.length > 0;
+
+									return (
+										<Field data-invalid={isInvalid}>
+											<FieldLabel htmlFor={field.name}>Image</FieldLabel>
+											<Input
+												type="file"
+												id={field.name}
+												name={field.name}
+												onBlur={field.handleBlur}
+												onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+													field.handleChange(e.target.files?.[0] as unknown as File)
+												}
+												aria-invalid={isInvalid}
+												accept="image/*"
 											/>
 											{isInvalid && <FieldError errors={field.state.meta.errors} />}
 										</Field>
