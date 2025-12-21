@@ -16,15 +16,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import { useTransition } from 'react';
-import { useRouter } from 'next/navigation';
-import { toast } from 'sonner';
-import { useMutation } from 'convex/react';
-import { api } from '@/convex/_generated/api';
+import { createBlogAction } from '@/app/actions';
 
 export default function CreatePage() {
 	const [isPending, startTransition] = useTransition();
-	const router = useRouter();
-	const createPost = useMutation(api.posts.createAuthPost);
+
 	const form = useForm({
 		defaultValues: {
 			title: '',
@@ -35,19 +31,7 @@ export default function CreatePage() {
 		},
 		onSubmit: async ({ value }: { value: z.infer<typeof createBlogSchema> }) => {
 			startTransition(async () => {
-				try {
-					await createPost({
-						title: value.title,
-						content: value.content,
-					});
-					toast.success('Blog article created successfully');
-					router.push('/');
-				} catch (error: unknown) {
-					console.error(error);
-					toast.error('Failed to create blog article', {
-						description: error instanceof Error ? error.message : 'Unknown error',
-					});
-				}
+				await createBlogAction({ value });
 			});
 		},
 	});

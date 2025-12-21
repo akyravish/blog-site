@@ -2,7 +2,7 @@ import { mutation } from './_generated/server';
 import { ConvexError, v } from 'convex/values';
 import { authComponent } from './auth';
 
-export const createAuthPost = mutation({
+export const createPost = mutation({
 	args: {
 		title: v.string(),
 		content: v.string(),
@@ -10,6 +10,7 @@ export const createAuthPost = mutation({
 	handler: async (ctx, args) => {
 		const { title, content } = args;
 		const user = await authComponent.safeGetAuthUser(ctx);
+
 		if (!user || !user._id) {
 			throw new ConvexError('Not authenticated');
 		}
