@@ -5,25 +5,27 @@ import { fetchMutation } from 'convex/nextjs';
 import { api } from '@/convex/_generated/api';
 import { redirect } from 'next/navigation';
 import { getToken } from '@/lib/auth-server';
+import { ConvexError } from 'convex/values';
 
 export async function createBlogAction({ value }: { value: z.infer<typeof createBlogSchema> }) {
+	// Validate the form data
+	const validateData = createBlogSchema.safeParse(value);
+	if (!validateData.success) {
+		return { error: 'Invalid form data. Please check your inputs.' };
+	}
+
+	// Get the auth token
+	const token = await getToken();
+	if (!token) {
+		return { error: 'You must be logged in to create a post.' };
+	}
+
 	try {
-		// validate the form data
-		const validateData = createBlogSchema.safeParse(value);
-		if (!validateData.success) {
-			throw new Error('Invalid form data');
-		}
-
-		// get the auth token
-		const token = await getToken();
-
-		if (!token) {
-			throw new Error('Not authenticated');
-		}
-
+		// Generate upload URL
 		const imageUrl = await fetchMutation(api.posts.generateImageUploadUrl, {}, { token });
 
-		const result = await fetch(imageUrl, {
+		// Upload the image
+		const uploadResult = await fetch(imageUrl, {
 			method: 'POST',
 			headers: {
 				'Content-Type': validateData.data.image.type,
@@ -31,13 +33,13 @@ export async function createBlogAction({ value }: { value: z.infer<typeof create
 			body: validateData.data.image,
 		});
 
-		if (!result.ok) {
-			throw new Error('Image upload failed');
+		if (!uploadResult.ok) {
+			return { error: 'Failed to upload image. Please try again.' };
 		}
 
-		const { storageId } = await result.json();
+		const { storageId } = await uploadResult.json();
 
-		// create the post
+		// Create the post
 		await fetchMutation(
 			api.posts.createPost,
 			{
@@ -48,11 +50,16 @@ export async function createBlogAction({ value }: { value: z.infer<typeof create
 			{ token },
 		);
 	} catch (error) {
-		console.error('Image upload failed', error);
-		return {
-			error: 'Failed to create blog post',
-		};
+		console.error('Failed to create blog post:', error);
+
+		// Handle Convex errors with structured data
+		if (error instanceof ConvexError) {
+			const data = error.data as { code?: string; message?: string };
+			return { error: data.message ?? 'Failed to create blog post.' };
+		}
+
+		return { error: 'Something went wrong. Please try again.' };
 	}
 
-	return redirect('/blog');
+	redirect('/blog');
 }

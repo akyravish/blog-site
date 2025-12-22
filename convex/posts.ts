@@ -9,36 +9,50 @@ export const createPost = mutation({
 		content: v.string(),
 		image: v.id('_storage'),
 	},
+	returns: v.id('posts'),
 	handler: async (ctx, args) => {
 		const { title, content } = args;
 		const user = await authComponent.safeGetAuthUser(ctx);
 
 		if (!user || !user._id) {
-			throw new ConvexError('Not authenticated');
+			throw new ConvexError({
+				code: 'UNAUTHORIZED',
+				message: 'You must be logged in to create a post',
+			});
 		}
-		const post = await ctx.db.insert('posts', {
+
+		return await ctx.db.insert('posts', {
 			title,
 			content,
 			author: user._id,
 			imageStorageId: args.image,
 		});
-		return post;
 	},
 });
 
 // Get all blog posts
 export const getPosts = query({
 	args: {},
+	returns: v.array(
+		v.object({
+			_id: v.id('posts'),
+			_creationTime: v.number(),
+			title: v.string(),
+			content: v.string(),
+			author: v.string(),
+			imageStorageId: v.id('_storage'),
+			imageUrl: v.union(v.string(), v.null()),
+		}),
+	),
 	handler: async (ctx) => {
 		const posts = await ctx.db.query('posts').order('desc').collect();
 
 		return Promise.all(
 			posts.map(async (post) => {
-				const resolvedImagedUrl =
-					post.imageStorageId !== undefined ? await ctx.storage.getUrl(post.imageStorageId) : null;
+				const resolvedImageUrl = await ctx.storage.getUrl(post.imageStorageId);
 				return {
 					...post,
-					imageUrl: resolvedImagedUrl,
+					imageUrl: resolvedImageUrl,
 				};
 			}),
 		);
@@ -50,23 +64,38 @@ export const getPostById = query({
 	args: {
 		postId: v.id('posts'),
 	},
+	returns: v.object({
+		_id: v.id('posts'),
+		_creationTime: v.number(),
+		title: v.string(),
+		content: v.string(),
+		author: v.string(),
+		imageStorageId: v.id('_storage'),
+	}),
 	handler: async (ctx, args) => {
 		const post = await ctx.db.get(args.postId);
 		if (!post) {
-			throw new ConvexError('Post not found');
+			throw new ConvexError({
+				code: 'NOT_FOUND',
+				message: `Post with ID "${args.postId}" not found`,
+			});
 		}
 		return post;
 	},
 });
 
-// generate image upload url
+// Generate image upload url
 export const generateImageUploadUrl = mutation({
 	args: {},
+	returns: v.string(),
 	handler: async (ctx) => {
 		const user = await authComponent.safeGetAuthUser(ctx);
 
 		if (!user || !user._id) {
-			throw new ConvexError('Not authenticated');
+			throw new ConvexError({
+				code: 'UNAUTHORIZED',
+				message: 'You must be logged in to upload images',
+			});
 		}
 
 		return await ctx.storage.generateUploadUrl();

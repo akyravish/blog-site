@@ -17,6 +17,7 @@ import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import { useTransition } from 'react';
 import { createBlogAction } from '@/app/actions';
+import { toast } from 'sonner';
 
 export default function CreatePage() {
 	const [isPending, startTransition] = useTransition();
@@ -32,7 +33,11 @@ export default function CreatePage() {
 		},
 		onSubmit: async ({ value }: { value: z.infer<typeof createBlogSchema> }) => {
 			startTransition(async () => {
-				await createBlogAction({ value });
+				const result = await createBlogAction({ value });
+				if (result?.error) {
+					toast.error(result.error);
+				}
+				// On success, the action redirects to /blog
 			});
 		},
 	});
