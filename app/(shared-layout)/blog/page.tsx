@@ -1,11 +1,14 @@
 import { buttonVariants } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import ErrorMessage from '@/components/web/error-message';
 import { api } from '@/convex/_generated/api';
 import { fetchQuery } from 'convex/nextjs';
 import Image from 'next/image';
 import Link from 'next/link';
 import { Suspense } from 'react';
+export const dynamic = 'force-static';
+export const revalidate = 60;
 
 export default function BlogPage() {
 	return (
@@ -37,52 +40,21 @@ async function LoadBlogList() {
 
 	if ('error' in result) {
 		return (
-			<div className="flex flex-col items-center justify-center py-12 text-center">
-				<div className="rounded-full bg-destructive/10 p-4 mb-4">
-					<svg
-						className="h-8 w-8 text-destructive"
-						fill="none"
-						viewBox="0 0 24 24"
-						stroke="currentColor">
-						<path
-							strokeLinecap="round"
-							strokeLinejoin="round"
-							strokeWidth={2}
-							d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-						/>
-					</svg>
-				</div>
-				<h3 className="text-lg font-semibold">Failed to load posts</h3>
-				<p className="mt-1 text-sm text-muted-foreground">
-					Something went wrong. Please try again later.
-				</p>
-				<Link href="/blog" className={buttonVariants({ variant: 'outline', className: 'mt-4' })}>
-					Retry
-				</Link>
-			</div>
+			<ErrorMessage
+				title="Failed to load blog posts"
+				message="Something went wrong. Please try again later."
+				link="/blog"
+			/>
 		);
 	}
 
 	if (result.length === 0) {
 		return (
-			<div className="flex flex-col items-center justify-center py-12 text-center">
-				<div className="rounded-full bg-muted p-4 mb-4">
-					<svg
-						className="h-8 w-8 text-muted-foreground"
-						fill="none"
-						viewBox="0 0 24 24"
-						stroke="currentColor">
-						<path
-							strokeLinecap="round"
-							strokeLinejoin="round"
-							strokeWidth={2}
-							d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"
-						/>
-					</svg>
-				</div>
-				<h3 className="text-lg font-semibold">No posts yet</h3>
-				<p className="mt-1 text-sm text-muted-foreground">Check back later for new content.</p>
-			</div>
+			<ErrorMessage
+				title="No blog posts found"
+				message="Check back later for new content."
+				link="/blog"
+			/>
 		);
 	}
 

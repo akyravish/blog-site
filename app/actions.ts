@@ -6,6 +6,7 @@ import { api } from '@/convex/_generated/api';
 import { redirect } from 'next/navigation';
 import { getToken } from '@/lib/auth-server';
 import { ConvexError } from 'convex/values';
+import { revalidatePath } from 'next/cache';
 
 export async function createBlogAction({ value }: { value: z.infer<typeof createBlogSchema> }) {
 	// Validate the form data
@@ -61,5 +62,6 @@ export async function createBlogAction({ value }: { value: z.infer<typeof create
 		return { error: 'Something went wrong. Please try again.' };
 	}
 
+	revalidatePath('/blog');
 	redirect('/blog');
 }

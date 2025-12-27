@@ -70,17 +70,32 @@ export const getPostById = query({
 		title: v.string(),
 		content: v.string(),
 		author: v.string(),
-		imageStorageId: v.id('_storage'),
+		imageUrl: v.union(v.string(), v.null()),
 	}),
 	handler: async (ctx, args) => {
 		const post = await ctx.db.get(args.postId);
+
 		if (!post) {
 			throw new ConvexError({
 				code: 'NOT_FOUND',
 				message: `Post with ID "${args.postId}" not found`,
 			});
 		}
-		return post;
+
+		let resolvedImageUrl: string | null = null;
+
+		if (post?.imageStorageId && typeof post.imageStorageId === 'string') {
+			resolvedImageUrl = await ctx.storage.getUrl(post.imageStorageId);
+		}
+
+		return {
+			title: post.title,
+			content: post.content,
+			author: post.author,
+			_creationTime: post._creationTime,
+			_id: post._id,
+			imageUrl: resolvedImageUrl,
+		};
 	},
 });
 
