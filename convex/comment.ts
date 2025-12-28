@@ -11,6 +11,16 @@ export const createAuthComment = mutation({
 	handler: async (ctx, args) => {
 		const { postId, content } = args;
 
+		// trim the whitespace from the content
+		const trimmedContent = content.trim();
+
+		if (trimmedContent.length === 0) {
+			throw new ConvexError({
+				code: 'BAD_REQUEST',
+				message: 'Comment content cannot be empty',
+			});
+		}
+
 		const user = await authComponent.safeGetAuthUser(ctx);
 
 		if (!user || !user._id) {
@@ -22,7 +32,7 @@ export const createAuthComment = mutation({
 
 		return await ctx.db.insert('comments', {
 			postId,
-			content,
+			content: trimmedContent,
 			author: user._id,
 			authorName: user.name,
 		});
