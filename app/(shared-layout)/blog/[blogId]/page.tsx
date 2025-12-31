@@ -1,6 +1,6 @@
 import { buttonVariants } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { CommentSection, CommentSectionSkeleton } from '@/components/web/commentSection';
+import { CommentSection } from '@/components/web/commentSection';
 import ErrorMessage from '@/components/web/error-message';
 import { api } from '@/convex/_generated/api';
 import { Id } from '@/convex/_generated/dataModel';
@@ -8,10 +8,10 @@ import { fetchQuery, preloadQuery } from 'convex/nextjs';
 import { ArrowLeft, Calendar } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Suspense } from 'react';
 import { Metadata } from 'next';
 import { PostPresence } from '@/components/web/postPresence';
 import { getToken } from '@/lib/auth-server';
+import { redirect } from 'next/navigation';
 
 interface BlogPostPageProps {
 	params: Promise<{ blogId: Id<'posts'> }>;
@@ -73,6 +73,10 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
 		fetchUserId(token),
 	]);
 
+	if (!userId) {
+		return redirect('/login');
+	}
+
 	if (hasError(comments) || hasError(post)) {
 		return (
 			<ErrorMessage
@@ -94,13 +98,9 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
 				<ArrowLeft className="size-4" />
 				Back
 			</Link>
-			<Suspense fallback={<BlogPostSkeleton />}>
-				<BlogPostContent post={post} userId={userId} />
-			</Suspense>
+			<BlogPostContent post={post} userId={userId} />
 			<Separator className="my-4" />
-			<Suspense fallback={<CommentSectionSkeleton />}>
-				<CommentSection preloadedComments={comments} />
-			</Suspense>
+			<CommentSection preloadedComments={comments} />
 		</div>
 	);
 }
@@ -135,25 +135,6 @@ async function BlogPostContent({ post, userId }: { post: PostData; userId: strin
 				<p className="text-lg leading-relaxed text-foreground/90 whitespace-pre-wrap">
 					{post.content}
 				</p>
-			</div>
-		</>
-	);
-}
-
-function BlogPostSkeleton() {
-	return (
-		<>
-			<div className="animate-pulse">
-				<div className="relative h-96 w-full mb-8 rounded-xl overflow-hidden shadow-sm mt-12">
-					<div className="bg-gray-200 animate-pulse h-full w-full" />
-				</div>
-			</div>
-			<div className="space-y-4 flex flex-col">
-				<div className="h-8 w-3/4 bg-gray-200 animate-pulse" />
-				<div className="h-4 w-1/2 bg-gray-200 animate-pulse" />
-				<div className="h-4 w-3/4 bg-gray-200 animate-pulse" />
-				<div className="h-4 w-2/3 bg-gray-200 animate-pulse" />
-				<div className="h-4 w-full bg-gray-200 animate-pulse" />
 			</div>
 		</>
 	);

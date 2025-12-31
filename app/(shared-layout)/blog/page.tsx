@@ -6,9 +6,8 @@ import { api } from '@/convex/_generated/api';
 import { fetchQuery } from 'convex/nextjs';
 import Image from 'next/image';
 import Link from 'next/link';
+import { connection } from 'next/server';
 import { Suspense } from 'react';
-export const dynamic = 'force-static';
-export const revalidate = 60;
 
 export default function BlogPage() {
 	return (
@@ -33,6 +32,7 @@ export default function BlogPage() {
 }
 
 async function LoadBlogList() {
+	await connection();
 	const result = await fetchQuery(api.posts.getPosts).catch((error: unknown) => {
 		console.error('Failed to fetch posts:', error);
 		return { error: true as const };

@@ -1,6 +1,7 @@
 import { mutation, query } from './_generated/server';
 import { ConvexError, v } from 'convex/values';
 import { authComponent } from './auth';
+import { Doc, Id } from './_generated/dataModel';
 
 // Create a new blog post
 export const createPost = mutation({
@@ -114,5 +115,64 @@ export const generateImageUploadUrl = mutation({
 		}
 
 		return await ctx.storage.generateUploadUrl();
+	},
+});
+
+interface searchResult {
+	_id: Id<'posts'>;
+	title: string;
+	content: string;
+}
+
+// Search for posts
+export const searchPosts = query({
+	args: {
+		query: v.string(),
+		limit: v.optional(v.number()),
+	},
+	returns: v.array(
+		v.object({
+			_id: v.id('posts'),
+			title: v.string(),
+			content: v.string(),
+		}),
+	),
+	handler: async (ctx, args) => {
+		const { query, limit } = args;
+
+		const results: searchResult[] = [];
+
+		const seen = new Set<string>();
+
+		const pushDocs = async (docs: Doc<'posts'>[]) => {
+			for (const doc of docs) {
+				if (seen.has(doc._id)) continue;
+				seen.add(doc._id);
+				results.push({
+					_id: doc._id,
+					title: doc.title,
+					content: doc.content,
+				});
+
+				if (results.length >= (limit ?? 5)) break;
+			}
+		};
+
+		const titleMatches = await ctx.db
+			.query('posts')
+			.withSearchIndex('search_posts', (q) => q.search('title', query))
+			.take(limit ?? 5);
+
+		await pushDocs(titleMatches);
+
+		if (results.length < (limit ?? 5)) {
+			const contentMatches = await ctx.db
+				.query('posts')
+				.withSearchIndex('search_posts_content', (q) => q.search('content', query))
+				.take(limit ?? 5);
+			await pushDocs(contentMatches);
+		}
+
+		return results;
 	},
 });
